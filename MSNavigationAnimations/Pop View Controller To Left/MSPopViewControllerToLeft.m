@@ -31,8 +31,10 @@
         toViewController.view.frame = finalToFrame;
         fromViewController.view.frame = CGRectOffset(finalToFrame, -width, 0);
     } completion:^(BOOL finished) {
-        [fromViewController removeFromParentViewController];
-        [transitionContext completeTransition:YES];
+        BOOL isCancelled = [transitionContext transitionWasCancelled];
+        if(!isCancelled)
+            [fromViewController removeFromParentViewController];
+        [transitionContext completeTransition:!isCancelled];
     }];
 }
 

@@ -28,7 +28,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="V5R-cO-k6z" kind="show" id="yiY-CK-yP1"/>
+                                    <segue destination="V5R-cO-k6z" kind="show" identifier="showSecondScreen" id="yiY-CK-yP1"/>
                                 </connections>
                             </button>
                         </subviews>

@@ -9,10 +9,9 @@
 #import "MSFirstViewController.h"
 #import "MSSecondViewController.h"
 #import "MSPushViewControllerFromLeft.h"
-#import "MSPopViewControllerToLeft.h"
 
-@interface MSFirstViewController () <UINavigationControllerDelegate>
-
+@interface MSFirstViewController () <UINavigationControllerDelegate, UIGestureRecognizerDelegate>
+@property (nonatomic, strong) UIPercentDrivenInteractiveTransition *panTransition;
 @end
 
 @implementation MSFirstViewController
@@ -20,9 +19,41 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    
+    UIScreenEdgePanGestureRecognizer *gesture = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+    gesture.delegate = self;
+    gesture.edges = UIRectEdgeLeft;
+    [self.view addGestureRecognizer:gesture];
+}
+
+-(void)viewDidAppear:(BOOL)animated{
     self.navigationController.delegate = self;
 }
 
+-(void)handlePan:(UIScreenEdgePanGestureRecognizer *)gesture{
+    CGPoint point = [gesture translationInView:self.view.window];
+    CGFloat percentage = point.x/CGRectGetWidth([UIScreen mainScreen].bounds);
+    
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan:
+            self.panTransition = [UIPercentDrivenInteractiveTransition new];
+            [self performSegueWithIdentifier:@"showSecondScreen" sender:self];
+            break;
+        case UIGestureRecognizerStateChanged:
+            [self.panTransition updateInteractiveTransition:percentage];
+            break;
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateCancelled:
+            if (percentage > 0.5)
+                [self.panTransition finishInteractiveTransition];
+            else
+                [self.panTransition cancelInteractiveTransition];
+            self.panTransition = nil;
+            break;
+        default:
+            break;
+    }
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -37,14 +68,16 @@
             return [MSPushViewControllerFromLeft new];
         }
     }
-    else if (operation == UINavigationControllerOperationPop)
-    {
-        if ([fromVC isKindOfClass:[MSSecondViewController class]])
-        {
-            return [MSPopViewControllerToLeft new];
-        }
-    }
     return nil;
+}
+
+-(id<UIViewControllerInteractiveTransitioning>)navigationController:(UINavigationController *)navigationController interactionControllerForAnimationController:(id<UIViewControllerAnimatedTransitioning>)animationController{
+    return self.panTransition;
+}
+
+#pragma mark - Gesture recognizer
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer{
+    return YES;
 }
 
 @end

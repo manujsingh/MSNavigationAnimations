@@ -30,7 +30,7 @@
         toViewController.view.frame = finalToFrame;
         fromViewController.view.frame = CGRectOffset(finalToFrame, width/4, 0);
     } completion:^(BOOL finished) {
-        [transitionContext completeTransition:YES];
+        [transitionContext completeTransition:![transitionContext transitionWasCancelled]];
     }];
 }
 
